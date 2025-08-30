@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>😱 Surpresa!</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif; }
+    body { margin:0; display:grid; place-items:center; min-height:100dvh; background:#0f0f12; color:#fff; }
+    .card { width:min(680px, 92vw); padding:28px; border-radius:20px; background:#17171c; box-shadow:0 10px 30px rgba(0,0,0,.35); text-align:center; }
+    h1 { margin:14px 0 8px; font-size:28px; }
+    p { opacity:.9; }
+    button { margin-top:16px; padding:14px 18px; border:0; border-radius:14px; font-weight:700; cursor:pointer; background:#4f46e5; color:white; }
+    button:active { transform:translateY(1px); }
+    .hidden { display:none; }
+    .confetti { position:fixed; inset:0; pointer-events:none; }
+    .progress { height:10px; background:#22262e; border-radius:999px; overflow:hidden; margin:18px 0; }
+    .bar { height:100%; width:0%; background:#4f46e5; transition:width .6s ease; }
+    .reveal { font-size:22px; margin-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Se cagaste né ksksksk 💀</h1>
+    <p>Clica aí embaixo pra ver o que te espera...</p>
+
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <button id="btn">Ver Surpresa</button>
+
+    <p id="reveal" class="reveal hidden">🤣 O Kid Bengaleiro vai atrás de ti!</p>
+  </div>
+
+  <canvas id="confetti" class="confetti"></canvas>
+  <audio id="song" src="https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/1mQb0p1pCw2nQqE1wU2q9q1yJc8M0tSknhV8bGQw.mp3"></audio>
+
+  <script>
+    const c = document.getElementById('confetti'), ctx = c.getContext('2d');
+    let W, H, parts = [];
+    function resize(){ W = c.width = innerWidth; H = c.height = innerHeight; }
+    addEventListener('resize', resize); resize();
+    function spawn(n=120){
+      parts = [...Array(n)].map(()=>({
+        x: Math.random()*W, y: -20-Math.random()*H*0.2,
+        r: 2+Math.random()*6, vx: -2+Math.random()*4, vy: 2+Math.random()*3,
+        rot: Math.random()*Math.PI, vr: -0.1+Math.random()*0.2
+      }));
+    }
+    function tick(){
+      ctx.clearRect(0,0,W,H);
+      parts.forEach(p=>{
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.02;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = `hsl(${(p.y/3)%360},80%,60%)`;
+        ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
+        ctx.restore();
+      });
+      parts = parts.filter(p=>p.y < H+30);
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    const btn = document.getElementById('btn');
+    const bar = document.getElementById('bar');
+    const reveal = document.getElementById('reveal');
+    const song = document.getElementById('song');
+
+    btn.addEventListener('click', async ()=>{
+      btn.disabled = true; btn.textContent = 'Carregando...';
+      for (let i=0;i<=100;i+=Math.random()*20){
+        await new Promise(r=>setTimeout(r, 300+Math.random()*300));
+        bar.style.width = Math.min(i,100)+'%';
+      }
+      bar.style.width = '100%';
+      spawn(200);
+      reveal.classList.remove('hidden');
+      btn.textContent = 'De novo!';
+      btn.disabled = false;
+      bar.style.width = '0%';
+      try { song.currentTime = 0; song.play(); } catch(e){}
+    });
+  </script>
+</body>
+</html>
